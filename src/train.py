@@ -40,7 +40,7 @@ def update_user_latent_matrix(
         p_u = P[u].toarray().flatten()  # (n_items,)
         C_u = np.diag(c_u)  # (n_items, n_items)  # 벡터 브로드캐스팅 방법 확인 필요 c_u[:None]?
 
-        A = YtY + np.matmul(Y.T, np.matmul(C_u - np.identity(n_items), Y)) + lambda_reg * I_k
+        A = YtY + np.matmul(Y.T, np.matmul(C_u - np.identity(n_items), Y)) + lambda_reg * I_k  # identity 말고 vector로 변경하여 overflow 해결 필요
 
         b = np.matmul(Y.T, np.matmul(C_u, p_u))
 
@@ -95,7 +95,7 @@ def compute_loss(
     Y: np.ndarray,
     C: csr_matrix,
     P: csr_matrix,
-    lambda_reg: float = 0.1
+    lambda_reg: float,
 ) -> float:
     """
     ALS 목적 함수 계산
@@ -113,8 +113,8 @@ def als_train(
     Y: np.ndarray,
     C: csr_matrix,
     P: csr_matrix,
-    lambda_reg: float = 0.1,
-    n_iter: int = 10
+    lambda_reg: float,
+    n_iter: int,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     ALS 학습.
@@ -124,7 +124,7 @@ def als_train(
         Y = update_item_latent_matrix(X, Y, C, P, lambda_reg)
         loss = compute_loss(X, Y, C, P, lambda_reg)
 
-        if it % 10 == 0:
+        if (it+1) % 10 == 0:
             print(f"[Iter {it+1}/{n_iter}] Loss : {loss:.4f}")
 
     return X, Y
@@ -135,15 +135,15 @@ if __name__ == "__main__":
     import preprocessing
 
     df = data_loader.parse_netflix_file(max_movie_id=100, max_user_id=10000)
-    P, C, user_to_idx, item_to_idx = preprocessing.preprocessing(df)
+    P, C, user_to_idx, item_to_idx = preprocessing.build_matrices(df=df, alpha=0.4)
 
     k = 20  # latent factor dimension
     lambda_reg = 0.1
+    n_iter = 30
 
     X = np.random.normal(scale=0.01, size=(len(user_to_idx), k))
     Y = np.random.normal(scale=0.01, size=(len(item_to_idx), k))
 
-
-    als_train(X, Y, C, P, lambda_reg, n_iter=100)
+    als_train(X, Y, C, P, lambda_reg=lambda_reg, n_iter=n_iter)
 
 
