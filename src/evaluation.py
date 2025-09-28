@@ -1,13 +1,27 @@
 """
-모델 평가 지표
-- Precision
-- Recall
-- MAP
-- NDCG
+모델 평가
 """
 
 import numpy as np
 
+
+def train_test_split(P: csr_matrix, test_ratio: float = 0.2, seed: int = 42) -> tuple[csr_matrix, csr_matrix]:
+    """Preference matrix P를 train/test로 나눔"""
+    # P를 랜덤하게 (혹은 시간 기준으로) Train/Test로 나눠줌
+    # Train은 학습용, Test는 평가용 정답(label)
+
+
+def recommend(X: np.ndarray, Y: np.ndarray, user_id: int, P_train: csr_matrix, top_k: int = 10) -> list[int]:
+    """특정 유저에 대해 Top-K 추천 아이템 반환"""
+    # 학습된 사용자/아이템 잠재 행렬로 점수 계산
+    # Train에서 이미 본 아이템 제외
+    # Top-K 리스트 반환
+
+def evaluate_model(X: np.ndarray, Y: np.ndarray, P_train: csr_matrix, P_test: csr_matrix, k: int = 10) -> dict[str, float]:
+    """
+    모든 유저에 대해 Precision@K, Recall@K, MAP@K, NDCG@K 평균 계산
+    """
+    # 유저별로 recommend 실행
 
 def precision_at_k(
     pred_items: list[int],
